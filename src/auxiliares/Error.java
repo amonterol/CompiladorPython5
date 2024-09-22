@@ -5,6 +5,7 @@
 package auxiliares;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
@@ -12,18 +13,25 @@ import java.util.HashMap;
  */
 public class Error {
         
-     HashMap<Integer, String> tiposDeErrores = new HashMap();
+    private static Map<Integer, String> tiposDeErrores = new HashMap();
 
     public Error() {
 
+        //Relacionados con archivo para analizar
         tiposDeErrores.put(100, "No se ha incluido el archivo con el código fuente en Python.");
         tiposDeErrores.put(101, "Se ha incluido más de un archivo para analizar.");
         tiposDeErrores.put(102, "El archivo para analizar debe tener la extensión .py ");
         tiposDeErrores.put(103, "El archivo para analizar no contiene información.");
+        
+        //Relacionados con verificacion de identificadores validos
+        tiposDeErrores.put(200, "Identificador no comienza con una letra o guión bajo.");
+        tiposDeErrores.put(201, "Identificador no válido porque contiene caracteres especiales diferentes de guión bajo.");
+        tiposDeErrores.put(203, "Identificador no válido porque es una palabra reservada de Python.");
+        
      
     }
 
-    public String obtenerDescripcionDeError(Integer key) {
+    public static String obtenerDescripcionDeError(Integer key) {
         return tiposDeErrores.get(key);
     }
 }

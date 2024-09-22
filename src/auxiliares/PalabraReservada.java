@@ -11,14 +11,15 @@ import java.util.List;
  *
  * @author abmon
  */
-public class PalabraReservada {
+public final class PalabraReservada {
 
     private List<String> palabrasReservadas = new ArrayList<>();
+    
+    public PalabraReservada(){
+        this.palabrasReservadas = crearListaDePalabrasReservadas();
+    }
 
     public List crearListaDePalabrasReservadas() {
-
-        this.palabrasReservadas = new ArrayList<>();
-
         this.palabrasReservadas.add("import");
         this.palabrasReservadas.add("def");
         this.palabrasReservadas.add("for");

@@ -12,7 +12,7 @@ public enum TipoDeToken {
 
         PALABRA_RESERVADA,
         NUMERO_ENTERO,
-        NUMERO_REAL,
+        NUMERO_DECIMAL,
         TIPO_DATO,
         IDENTIFICADOR,
         MULTIPLICACION,

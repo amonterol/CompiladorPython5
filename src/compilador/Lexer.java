@@ -4,15 +4,14 @@
  */
 package compilador;
 
-import auxiliares.PalabraReservada;
-import auxiliares.TipoDeToken;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import auxiliares.Token;
+import auxiliares.Error;
 import auxiliares.PalabraReservada;
 import auxiliares.TipoDeToken;
-import auxiliares.Token;
 
 /**
  *
@@ -65,7 +64,7 @@ public class Lexer {
             for (int i = 0; i < arregloCaracteres.length; ++i) {
 
                 caracterActual = arregloCaracteres[i];
-                System.out.println("\n"+ (i+1) + "-> 3 LEEMOS EL CARACTER ACTUAL " + caracterActual + " posicion " + i + " size " + arregloCaracteres.length);
+                System.out.println("\n" + (i + 1) + "-> 3 LEEMOS EL CARACTER ACTUAL " + caracterActual + " posicion " + i + " size " + arregloCaracteres.length);
                 switch (caracterActual) {
 
                     // Se ignoran los caracteres en blanco
@@ -78,11 +77,12 @@ public class Lexer {
 
                     // Identifica el operador de asignación
                     case '=':
-                        agregarNuevoToken(null, null, String.valueOf(caracterActual), this.numeroLineaActual);
+                        agregarNuevoToken(null, TipoDeToken.ASIGNACION, String.valueOf(caracterActual), this.numeroLineaActual);
                         break;
 
                     // Identifica números enteros, decimales, identificadores y palabras reservadas    
                     default: {
+                        PalabraReservada palabraReservada = new PalabraReservada();
                         if (esCaracterAlfaNumerico(caracterActual) || caracterActual == '_') {
                             string = string + caracterActual;
                         }
@@ -99,26 +99,39 @@ public class Lexer {
                             }
                         }
 
-                        System.out.println("\n" + " 8 ESTE ES la cadena " + string.trim() + " posicion en el arreglo de caracteres " + i);
+                       
+                        if (esNumeroEntero(string.trim())) {
+                            agregarNuevoToken(string, TipoDeToken.NUMERO_ENTERO, string.trim(), this.numeroLineaActual);
+                        } else if (esNumeroDecimal(string.trim())) {
+                            agregarNuevoToken(string, TipoDeToken.NUMERO_DECIMAL, string.trim(), this.numeroLineaActual);
+                        } else if (palabraReservada.esPalabraReservada(string.trim())) {
+                            agregarNuevoToken(string, TipoDeToken.PALABRA_RESERVADA, string.trim(), this.numeroLineaActual);
+                        } else if (verificarPrimerCaracterDeUnIdentificador(string.trim()) && verificarSecuenciaDeCaracteresDeUnIdentificador(string.trim())) {
+                            agregarNuevoToken(string, TipoDeToken.IDENTIFICADOR, string.trim(), this.numeroLineaActual);
+                        } else {
+                            agregarNuevoToken(string, TipoDeToken.DESCONOCIDO, string.trim(), this.numeroLineaActual);
+                        }
 
                         string = " ";
+
                         break;
+
                     }//fin default
                 } //Fin switch
                 numeroLineaActual++; //Aumenta con cada linea que es analizada
             } //Fin del for
 
-            /*
-            System.out.println("\n\n<<< 218 Lexico> CANTIDAD DE TOKENS EN EL LEXICO>>> " + listaDeTokens.size());
+            
+
+        }
+
+        System.out.println("\n\n<<< 124 Lexico> CANTIDAD DE TOKENS EN EL LEXICO>>> " + listaDeTokens.size());
             System.out.println("\n\n<<<CANTIDAD DE TOKENS>>> " + listaDeTokens.size());
             listaDeTokens.forEach((item) -> {
                 System.out.println(item.getLexema() + " " + item.getTipoDeToken() + " " + item.getValor() + " " + item.getLinea());
             });
 
             System.out.println("\n\n<<<NUMERO DE COMENTARIOS>>> " + cantidadComentarios);
-             */
-        }
-
     }//Fin metodo analizadorLexico
 
     public List<Token> getListaDeTokens() {
@@ -143,7 +156,7 @@ public class Lexer {
         return contador >= arregloCaracteres.length;
     }
 
-    public static void agregarNuevoToken(String nombreToken, String tipoDeToken, String valor, int numeroLinea) {
+    public static void agregarNuevoToken(String nombreToken, TipoDeToken tipoDeToken, String valor, int numeroLinea) {
         Token nuevoToken = new Token(nombreToken, tipoDeToken, valor, numeroLinea);
 
         listaDeTokens.add(nuevoToken);
@@ -161,6 +174,69 @@ public class Lexer {
 
     private static boolean esCaracterAlfaNumerico(char c) {
         return esCaracterAlfabetico(c) || esCaracterNumerico(c);
+    }
+
+    //Valida si el token corresponde a un identificador valido
+    public static boolean verificarPrimerCaracterDeUnIdentificador(String string) {
+
+        
+        if (string == null || string.isEmpty()) {
+            return false;
+        }
+               
+        if(string.matches("^[a-zA-Z].*")){
+            return true;
+        } else {
+              System.out.println("191 Borrar " + Error.obtenerDescripcionDeError(201));
+              return false;
+        }       
+        
+        
+    }
+
+    //Verifica que el identificador sea una secuencia de letras y
+    //numeros sin caracteres especiales a partir del segundo caracter
+    public boolean verificarSecuenciaDeCaracteresDeUnIdentificador(String string) {
+        // Verificar los caracteres restantes
+        if (string == null || string.isEmpty()) {
+            return false;
+        }
+               
+        if(string.matches("[a-zA-Z0-9_]*$")){
+            return true;
+        } else {
+              System.out.println("209 Borrar " + Error.obtenerDescripcionDeError(201));
+              return false;
+        }   
+       
+    }
+
+    //Valida si el token corresponde a una palabra reservada
+    public static boolean esNumeroEntero(String str) {
+        if (str == null || str.isEmpty()) {
+            return false;
+        }
+
+        try {
+            Integer.valueOf(str);
+            return true; // El token es un número entero
+        } catch (NumberFormatException e) {
+            return false; // El token no es entero 
+        }
+    }
+
+    //Valida si el token corresponde a un numero decimal o entero
+    public static boolean esNumeroDecimal(String str) {
+        if (str == null || str.isEmpty()) {
+            return false;
+        }
+
+        try {
+            Double.valueOf(str);
+            return true; // El token es un número decimal
+        } catch (NumberFormatException e) {
+            return false; // El token no es un número decimal
+        }
     }
 
     public void imprimirListas(List<String> contenidoArchivo) {

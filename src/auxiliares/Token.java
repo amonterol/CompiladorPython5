@@ -10,15 +10,15 @@ package auxiliares;
  */
 public class Token {
 
-   private String lexema; //private TokenType type;
-    private String tipoDeToken;
+    private String lexema; //private TokenType type;
+    private TipoDeToken tipoDeToken;
     private String literal; //private Object literal;
     private int numeroLinea;
 
     public Token() {
     }
 
-    public Token(String lexema, String tipo, String literal, int linea) {
+    public Token(String lexema, TipoDeToken tipo, String literal, int linea) {
         this.lexema = lexema;
         this.tipoDeToken = tipo;
         this.literal = literal;
@@ -29,7 +29,7 @@ public class Token {
         return lexema;
     }
 
-    public String getTipoDeToken() {
+    public TipoDeToken getTipoDeToken() {
         return tipoDeToken;
     }
 
