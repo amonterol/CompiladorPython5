@@ -29,20 +29,38 @@ public class Token {
         return lexema;
     }
 
+    public void setLexema(String lexema) {
+        this.lexema = lexema;
+    }
+
     public TipoDeToken getTipoDeToken() {
         return tipoDeToken;
     }
 
-    public String getValor() {
+    public void setTipoDeToken(TipoDeToken tipoDeToken) {
+        this.tipoDeToken = tipoDeToken;
+    }
+
+    public String getLiteral() {
         return literal;
     }
 
-    public int getLinea() {
+    public void setLiteral(String literal) {
+        this.literal = literal;
+    }
+
+    public int getNumeroLinea() {
         return numeroLinea;
+    }
+
+    public void setNumeroLinea(int numeroLinea) {
+        this.numeroLinea = numeroLinea;
     }
 
     @Override
     public String toString() {
-        return getTipoDeToken() + " " + getLexema() + " " + getValor() + " " + getLinea();
+        return "Token{" + "lexema=" + lexema + ", tipoDeToken=" + tipoDeToken + ", literal=" + literal + ", numeroLinea=" + numeroLinea + '}';
     }
+
+ 
 }

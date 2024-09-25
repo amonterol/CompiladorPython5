@@ -11,32 +11,52 @@ package auxiliares;
 public enum TipoDeToken {
 
         PALABRA_RESERVADA,
+        
         NUMERO_ENTERO,
         NUMERO_DECIMAL,
-        TIPO_DATO,
+        
         IDENTIFICADOR,
-        MULTIPLICACION,
-        DIVISION,
+        
         SUMA,
         RESTA,
-        MENOR_QUE,
-        MENOR_O_IGUAL_QUE,
+        MULTIPLICACION,
+        DIVISION,
+        MODULO,
+        POTENCIA,
+        DIVISION_ENTERA,
+        
         MAYOR_QUE,
         MAYOR_O_IGUAL_QUE,
+        MENOR_QUE,
+        MENOR_O_IGUAL_QUE,
         IGUAL,
         DIFERENTE,
-        DECLARACION_DE_TIPO,
+        
+        
+        
         ASIGNACION,
-        COMENTARIO_UNA_LINEA,
-        COMENTARIO_MULTILINEA,
-        INICIO_COMENTARIO,
-        FIN_COMENTARIO,
-        PUNTO_Y_COMA,
-        COMA,
-        PUNTO,
+        
+        COMILLAS,
+        
+        DOS_PUNTOS, //DECLARACION_DE_TIPO,
+        
         PARENTESIS_IZQUIERDO,
         PARENTESIS_DERECHO,
-        LINEA_EN_BLANC0,
+        CORCHETE_IZQUIERDO,
+        CORCHETE_DERECHO,
+
+        AND,
+        OR,
+        NOT,
+        
+        IN,
+        NOT_IN,
+        
+        IS,
+        IS_NOT,
+        
+        TEXTO_ENTRE_COMILLAS,
+        
         DESCONOCIDO,;
 
        

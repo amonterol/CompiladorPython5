@@ -10,6 +10,9 @@ no-valido!
 abc
 123abc
 
+
+123.456.789
+
 #Primero comentario
 
 import
@@ -19,3 +22,7 @@ True
 
 #Segundo comentario
 1a =  2#Segundo comentario
+
+abc_1 = 1bac
+
+_abc_1 = abc

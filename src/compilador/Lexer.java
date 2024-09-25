@@ -40,6 +40,10 @@ public class Lexer {
         // System.out.println("\n3 LEXER > INICIO LINEA DE CODIGO CONVERTIDA A CARACTERES  " + lineaDeCodigoActual);
         char caracterActual = ' '; //Almacena el caracter que actualmente se lee en la línea de código
         char caracterSiguiente = ' '; //Almacena el caracter siguiente al que actualmente se lee en la línea de código
+
+        boolean posibleIdentificador = false;
+        boolean posibleNumero = false;
+
         String identificador = "";
         String string = "";
         String comentario = "";
@@ -69,7 +73,7 @@ public class Lexer {
 
             //Recorre la línea de código actuas
             for (int i = 0; i < arregloCaracteres.length; ++i) {
-
+                boolean existenComillas = false;
                 caracterActual = arregloCaracteres[i];
                 System.out.println("\n" + (i + 1) + "-> 3 LEEMOS EL CARACTER ACTUAL " + caracterActual + " posicion " + i + " size " + arregloCaracteres.length);
                 switch (caracterActual) {
@@ -82,29 +86,162 @@ public class Lexer {
                                 + caracterActual + " posicion " + i + " size " + arregloCaracteres.length);
                         break;
 
+                    //Identifica los operadores aritméticos    
+                    case '+':
+                        agregarNuevoToken(null, TipoDeToken.SUMA, String.valueOf(caracterActual), numeroLineaActual);
+                        break;
+                    case '-':
+                        agregarNuevoToken(null, TipoDeToken.RESTA, String.valueOf(caracterActual), numeroLineaActual);
+                        break;
+                    case '*':
+                        agregarNuevoToken(null, TipoDeToken.MULTIPLICACION, String.valueOf(caracterActual), numeroLineaActual);
+                        break;
+                    case '/':
+                        agregarNuevoToken(null, TipoDeToken.DIVISION, String.valueOf(caracterActual), numeroLineaActual);
+                        break;
+                    case '%':
+                        agregarNuevoToken(null, TipoDeToken.MODULO, String.valueOf(caracterActual), numeroLineaActual);
+                        break;
+                    /*
+                     case '**':
+                        agregarNuevoToken(null, TipoDeToken.POTENCIA, String.valueOf(caracterActual), numeroLineaActual);
+                        break;
+                     case '//':
+                        agregarNuevoToken(null, TipoDeToken.DIVISION_ENTERA, String.valueOf(caracterActual), numeroLineaActual);
+                        break;    
+                     */
+
+                    //Identifica los operadores de agrupación
+                    case '(':
+                        agregarNuevoToken(null, TipoDeToken.PARENTESIS_IZQUIERDO, String.valueOf(caracterActual), numeroLineaActual);
+                        break;
+                    case ')':
+                        agregarNuevoToken(null, TipoDeToken.PARENTESIS_DERECHO, String.valueOf(caracterActual), numeroLineaActual);
+                        break;
+
+                    //Identifica operadores de relacionales
+                    case '<':
+                        if (arregloCaracteres.length < i) {
+                            caracterSiguiente = arregloCaracteres[i++];
+                            switch (caracterSiguiente) {
+                                case '=':
+                                    agregarNuevoToken(null, TipoDeToken.MENOR_O_IGUAL_QUE, "<=", numeroLineaActual);
+                                    break;
+                                case ' ':
+                                    agregarNuevoToken(null, TipoDeToken.MENOR_QUE, String.valueOf(caracterActual), numeroLineaActual);
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                        break;
+
+                    case '>':
+                        if (arregloCaracteres.length < i) {
+                            caracterSiguiente = arregloCaracteres[i++];
+                            switch (caracterSiguiente) {
+                                case '=':
+                                    agregarNuevoToken(null, TipoDeToken.MAYOR_O_IGUAL_QUE, ">=", numeroLineaActual);
+                                    break;
+                                case ' ':
+                                    agregarNuevoToken(null, TipoDeToken.MAYOR_QUE, null, numeroLineaActual);
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                        break;
+
                     // Identifica el operador de asignación
                     case '=':
                         agregarNuevoToken(null, TipoDeToken.ASIGNACION, String.valueOf(caracterActual), this.numeroLineaActual);
                         break;
 
+                    //Identifica los operadores dos puntos ->  de sublista, subcadena o subarreglos y tipo de retorno de una función    
+                    case ':':
+                        agregarNuevoToken(null, TipoDeToken.DOS_PUNTOS, String.valueOf(caracterActual), numeroLineaActual);
+                        break;
+
+                    //Identifica los operadores de string 
+                    case '"':
+                        agregarNuevoToken(null, TipoDeToken.COMILLAS, String.valueOf(caracterActual), numeroLineaActual);
+                        StringBuilder textoEntreComillas = new StringBuilder();
+
+                        boolean existeCierreDeComillas = false;
+
+                        char[] caracteres1 = {' ', '"', '=', '(', ')', '[', ']', '+', '-', '*', '/', '%', '<', '>'};
+
+                        if (i < arregloCaracteres.length - 1) {
+                            caracterSiguiente = arregloCaracteres[i + 1];
+
+                            while ((i < arregloCaracteres.length - 1)) {
+                                boolean encontrado = false;
+                                for (char ch : caracteres1) {
+                                    if (caracterSiguiente == ch) {
+                                        encontrado = true;
+                                        if (ch == '"') {
+                                            existeCierreDeComillas = true;
+                                        }
+                                        break;
+                                    }
+                                }
+
+                                if (encontrado) {
+                                    break;
+                                } else {
+                                    ++i;
+                                    caracterActual = arregloCaracteres[i];
+                                    textoEntreComillas.append(caracterActual);
+                                    if (i < (arregloCaracteres.length - 1)) {
+                                        caracterSiguiente = arregloCaracteres[i + 1];
+                                    } // fin if
+                                }
+
+                            } // fin while
+                            agregarNuevoToken(null, TipoDeToken.TEXTO_ENTRE_COMILLAS, textoEntreComillas.toString(), numeroLineaActual);
+                            break;
+                        } // fin if
+
+                        
+                        if (existeCierreDeComillas) {
+                            agregarNuevoToken(null, TipoDeToken.COMILLAS, String.valueOf('"'), numeroLineaActual);
+                        }
+
+                        break;
+
                     // Identifica números enteros, decimales, identificadores y palabras reservadas    
                     default: {
+
                         PalabraReservada palabraReservada = new PalabraReservada();
+                        char[] caracteres = {' ', '=', '(', ')', '[', ']', '+', '-', '*', '/', '%', '<', '>'};
 
                         string = string + caracterActual;
 
                         if (i < arregloCaracteres.length - 1) {
                             caracterSiguiente = arregloCaracteres[i + 1];
 
-                            while ((i < arregloCaracteres.length - 1) && caracterSiguiente != ' ') {
-                                ++i;
-                                caracterActual = arregloCaracteres[i];
-                                string = string + caracterActual;
-                                if (i < (arregloCaracteres.length - 1)) {
-                                    caracterSiguiente = arregloCaracteres[i + 1];
+                            while ((i < arregloCaracteres.length - 1)) {
+                                boolean encontrado = false;
+                                for (char ch : caracteres) {
+                                    if (caracterSiguiente == ch) {
+                                        encontrado = true;
+                                        break;
+                                    }
                                 }
-                            }
-                        }
+
+                                if (encontrado) {
+                                    break;
+                                } else {
+                                    ++i;
+                                    caracterActual = arregloCaracteres[i];
+                                    string = string + caracterActual;
+                                    if (i < (arregloCaracteres.length - 1)) {
+                                        caracterSiguiente = arregloCaracteres[i + 1];
+                                    } // fin if
+                                }
+
+                            } // fin while
+                        } // fin if
 
                         /*
                         if (esCaracterAlfaNumerico(caracterActual) || caracterActual == '_') {
@@ -123,8 +260,8 @@ public class Lexer {
                             }
                         }
                         
-                        */
-                        System.out.println(" 108 Este es el TOKEN  BORRAR:   " + string.trim() + " en linea " + numeroLineaActual + "\n");
+                         */
+                        System.out.println(" 108 Este es el TOKEN  BORRAR:   " + string.trim() + " en linea " + numeroLineaActual + "  valor de i " + i + "\n");
 
                         if (esNumeroEntero(string.trim())) {
                             agregarNuevoToken(string, TipoDeToken.NUMERO_ENTERO, string.trim(), this.numeroLineaActual);
@@ -144,16 +281,16 @@ public class Lexer {
                         break;
 
                     }//fin default
-                } //Fin switch
-                numeroLineaActual++; //Aumenta con cada linea que es analizada
-            } //Fin del for
+                    } //Fin switch
 
+            } //Fin del for
+            numeroLineaActual++; //Aumenta con cada linea que es analizada
         }
 
         System.out.println("\n\n<<< 124 Lexico> CANTIDAD DE TOKENS EN EL LEXICO>>> " + listaDeTokens.size());
         System.out.println("\n\n<<<CANTIDAD DE TOKENS>>> " + listaDeTokens.size());
         listaDeTokens.forEach((item) -> {
-            System.out.println(item.getLexema() + " " + item.getTipoDeToken() + " " + item.getValor() + " " + item.getLinea());
+            System.out.println(item.getLexema() + " " + item.getTipoDeToken() + " " + item.getLiteral() + " " + item.getNumeroLinea());
         });
 
         System.out.println("\n\n<<< 124 Lexico> LISTA DE TOKENS REVISADO>>> " + programaEnPythonRevisado.size());
@@ -221,7 +358,7 @@ public class Lexer {
             return false;
         }
 
-        if (string.matches("^[a-zA-Z].*")) {
+        if (string.matches("^[a-zA-Z_].*")) {
             return true;
         } else {
             System.out.println("191 Borrar " + Error.obtenerDescripcionDeError(200));
