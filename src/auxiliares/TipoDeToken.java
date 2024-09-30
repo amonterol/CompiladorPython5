@@ -29,8 +29,8 @@ public enum TipoDeToken {
         MAYOR_O_IGUAL_QUE,
         MENOR_QUE,
         MENOR_O_IGUAL_QUE,
-        IGUAL,
-        DIFERENTE,
+        IGUAL_QUE,
+        DIFERENTE_QUE,
         
         
         

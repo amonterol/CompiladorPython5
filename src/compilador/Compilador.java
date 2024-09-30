@@ -18,37 +18,44 @@ import java.util.ArrayList;
 public class Compilador {
 
     public static final Error listaDeErrores = new Error();
-    public static String archivoAdjunto;
+    public static String archivoDeEntrada;
+    public static String archivoDeSalida;
     public static List<String> contenidoArchivo = new ArrayList();
 
     public static void main(String[] args) {
 
         if (validarArchivoParaAnalizar(args)) {
-            archivoAdjunto = args[0]; //Solo hay un archivo para analizar
-            if (validarExtensionArchivoParaAnalizar(archivoAdjunto)) {
-                System.out.println("""
-                                        1 CLASE COMIPILADOR BORRAR: ESTAMOS ANALIZANDO LA EXTENSION DEL ARCHIVO PARA ANALZAR
-                                       """);
-                if (!validarContenidoArchivoParaAnalizar(archivoAdjunto)) {
+            archivoDeEntrada = args[0]; //Solo hay un archivo para analizar
+            if (validarExtensionArchivoParaAnalizar(archivoDeEntrada)) {
+                if (!validarContenidoArchivoParaAnalizar(archivoDeEntrada)) {
                     try {
                         Archivo archivo = new Archivo();
 
+                        archivoDeEntrada = args[0]; //Solo hay un archivo para analizar
+                        archivoDeSalida = archivoDeEntrada.replace(".py", "-error.log");
+
                         //Lee el archivo para analizar y crea una lista de array con cada linea del archivo para analizar
-                        contenidoArchivo = archivo.leerArchivo(archivoAdjunto);
+                        try {
+                            contenidoArchivo = archivo.leerArchivo(archivoDeEntrada);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        
+
                         System.out.println("""
                                        
-                                       2 CLASE COMIPILADOR BORRAR: ESTE ES EL CONTENIDO DEL ARCHIVO GATO.PY
-                                       
+                                       2 CLASE COMIPILADOR BORRAR: ESTE ES EL CONTENIDO DEL ARCHIVO                                       
                                        """);
+
                         imprimirListas(contenidoArchivo); //BORRAR
-                        String nombreArchivo = "salida.txt"; //BORRAR
-                        archivo.escribirArchivo(contenidoArchivo, nombreArchivo);
+
+                        archivo.escribirArchivo(contenidoArchivo, archivoDeSalida);
                         System.out.println("""
                                         
-                                       3 CLASE COMIPILADOR BORRAR: ESTE ES EL CONTENIDO DEL ARCHIVO SALIDA.TXT
+                                       3 CLASE COMIPILADOR BORRAR: ESTE ES EL CONTENIDO DEL ARCHIVO log
                                        
                                        """);
-                        archivo.imprimirArchivo(nombreArchivo); //BORRAR
+                        archivo.imprimirArchivo(archivoDeSalida); //BORRAR
 
                         Lexer lexer = new Lexer(contenidoArchivo);
                         lexer.analizadorLexico(contenidoArchivo);

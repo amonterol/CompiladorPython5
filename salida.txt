@@ -1,1 +1,2 @@
-print("abc")
+
+nombre = input("Ingrese su nombre: ")
