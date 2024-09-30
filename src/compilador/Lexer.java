@@ -90,7 +90,8 @@ public class Lexer {
                 boolean existenComillas = false;
 
                 caracterActual = contenidoDeLaLineaActual.charAt(indiceCaracterActual);
-                System.out.println(indiceCaracterActual + " EL CARACTER ACTUAL ES: " + caracterActual);
+                System.out.println("93 Linea actual:   " + contenidoDeLaLineaActual + " en linea " + numeroLineaActual + "\n");
+                System.out.println("94 Posicion caracter actual  " + indiceCaracterActual + " EL CARACTER ACTUAL ES: " + caracterActual);
                 switch (caracterActual) {
 
                     // Se ignoran los caracteres en blanco
@@ -215,56 +216,61 @@ public class Lexer {
 
                     // Identifica números enteros, decimales, identificadores y palabras reservadas    
                     default: {
-
+                        System.out.println(" 218 Caracter actual:   " + String.valueOf(caracterActual) + " en linea " + numeroLineaActual + "\n");
                         StringBuffer str1 = new StringBuffer();
-                      
-                        while (indiceCaracterActual < contenidoDeLaLineaActual.length() && caracterActual != ' ') {
-                            str1.append(contenidoDeLaLineaActual.charAt(indiceCaracterActual));
-                            indiceCaracterActual++;
-                        }
+                        //boolean existeDEF = contenidoDeLaLineaActual.contains("Def");
+
+                        boolean existePRINT = contenidoDeLaLineaActual.contains("print");
+                        boolean existeINPUT = contenidoDeLaLineaActual.contains("input");
+                        System.out.println(" 223 Existe INPUT BORRAR:   " + contenidoDeLaLineaActual.contains("input") + " en linea " + numeroLineaActual + "\n");
+                        System.out.println(" 224 Caracter actual:   " + String.valueOf(caracterActual) + " en linea " + numeroLineaActual + "\n");
                         
+                        if (esCaracterAlfaNumerico(caracterActual) || caracterActual == '_') {
+                            if (existePRINT || existeINPUT) {
+                                str1.append(caracterActual);
+                               
+                                System.out.println(" 230 En existe INPUT O PRINT:   " + String.valueOf(caracterActual) + " en linea " + numeroLineaActual + "\n");
+                                
+                                do {
+                                   caracterActual = contenidoDeLaLineaActual.charAt(++indiceCaracterActual);
+                                    System.out.println(" 236 Caracter actual:   " + String.valueOf(caracterActual) + " en posiciona " + indiceCaracterActual + "\n");
+                                    if(caracterActual == '('){
+                                        break;
+                                    }
+                                    str1.append(caracterActual);
+                                    System.out.println(" 239 Caracter actual:   " + str1 + "\n");
+                                   
+                                } while (indiceCaracterActual < contenidoDeLaLineaActual.length() && caracterActual != ' ' );
+                                indiceCaracterActual--;
+                          
+                            } else {
+                                while (indiceCaracterActual < contenidoDeLaLineaActual.length() && caracterActual != ' ') {
+                                    str1.append(contenidoDeLaLineaActual.charAt(indiceCaracterActual));
+                                    indiceCaracterActual++;
+                                }
+                            }
+
+                        }
+
                         PalabraReservada palabraReservada = new PalabraReservada();
 
-                        
-                        //Identifica un posible identificador o palabra reservada
-                        
-                        
-                        if (esCaracterAlfabetico(caracterActual) || caracterActual == '_') {
-                            String identifier = leyendoCadenaDeCaracteres(arregloCaracteres);
-                            System.out.println(" 194 Este es el TOKEN  BORRAR:   " + identifier.trim() + " en linea " + numeroLineaActual
+                        if (palabraReservada.esPalabraReservada(str1.toString())) {
+                            agregarNuevoToken(null, TipoDeToken.PALABRA_RESERVADA, str1.toString(), this.numeroLineaActual);
+                        } else if (esNumeroEntero(str1.toString())) {
+                            agregarNuevoToken(null, TipoDeToken.NUMERO_ENTERO, str1.toString(), this.numeroLineaActual);
+                        } else if (esNumeroDecimal(str1.toString())) {
+                            agregarNuevoToken(null, TipoDeToken.NUMERO_DECIMAL, str1.toString(), this.numeroLineaActual);
+                        } else if (verificarPrimerCaracterDeUnIdentificador(str1.toString(), numeroLineaActual)
+                                && verificarSecuenciaDeCaracteresDeUnIdentificador(str1.toString(), numeroLineaActual)) {
+                            System.out.println(" 194 Este es el TOKEN  BORRAR:   " + str1.toString() + " en linea " + numeroLineaActual
                                     + "  valor de i " + indiceCaracterActual + "\n");
+                            agregarNuevoToken(null, TipoDeToken.IDENTIFICADOR, str1.toString(), this.numeroLineaActual);
 
-                            if (palabraReservada.esPalabraReservada(identifier)) {
-                                agregarNuevoToken(string, TipoDeToken.PALABRA_RESERVADA, identifier.trim(), this.numeroLineaActual);
-                            } else if (verificarPrimerCaracterDeUnIdentificador(identifier.trim(), numeroLineaActual)
-                                    && verificarSecuenciaDeCaracteresDeUnIdentificador(identifier.trim(), numeroLineaActual)) {
-                                System.out.println(" 194 Este es el TOKEN  BORRAR:   " + identifier.trim() + " en linea " + numeroLineaActual
-                                        + "  valor de i " + indiceCaracterActual + "\n");
-                                agregarNuevoToken(string, TipoDeToken.IDENTIFICADOR, identifier.trim(), this.numeroLineaActual);
-
-                            } else {
-                                agregarNuevoToken(string, TipoDeToken.DESCONOCIDO, identifier.trim(), this.numeroLineaActual);
-                            }
-                        }
-
-                    
-
-
-                        /*
-                        if (esNumeroEntero(string.trim())) {
-                            agregarNuevoToken(string, TipoDeToken.NUMERO_ENTERO, string.trim(), this.numeroLineaActual);
-                        } else if (esNumeroDecimal(string.trim())) {
-                            agregarNuevoToken(string, TipoDeToken.NUMERO_DECIMAL, string.trim(), this.numeroLineaActual);
-                        } else if (palabraReservada.esPalabraReservada(string.trim())) {
-                            agregarNuevoToken(string, TipoDeToken.PALABRA_RESERVADA, string.trim(), this.numeroLineaActual);
-                        } else if (verificarPrimerCaracterDeUnIdentificador(string.trim(), numeroLineaActual)
-                                && verificarSecuenciaDeCaracteresDeUnIdentificador(string.trim(), numeroLineaActual)) {
-                            agregarNuevoToken(string, TipoDeToken.IDENTIFICADOR, string.trim(), this.numeroLineaActual);
                         } else {
-                            agregarNuevoToken(string, TipoDeToken.DESCONOCIDO, string.trim(), this.numeroLineaActual);
+                            agregarNuevoToken(null, TipoDeToken.DESCONOCIDO, str1.toString().trim(), this.numeroLineaActual);
                         }
 
-                         */
+                        
                         break;
 
                     }//fin default

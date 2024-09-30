@@ -31,7 +31,7 @@ public class Archivo {
             try (BufferedReader br = new BufferedReader(new FileReader(rutaArchivo))) {
                 String linea;
                 while ((linea = br.readLine()) != null) {
-                    lineas.add(linea);
+                    lineas.add(linea.trim());
                 }
             }
         } catch (IOException e) {
