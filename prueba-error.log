@@ -1,4 +1,4 @@
 
 
-y = input("Ingrese su nombre: ")
-x = variable#
+_variables
+print

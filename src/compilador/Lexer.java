@@ -35,7 +35,7 @@ public class Lexer {
         this.programaEnPythonRevisado = new ArrayList<>();
         this.erroresEnProgamaEnPythonOriginal = new Error();
         this.cantidadComentarios = 0;
-        this.numeroLineaActual = 0;// Almancena en número de la línea que se esta leyento actualmente
+        this.numeroLineaActual = 1;// Almancena en número de la línea que se esta leyento actualmente
         this.indiceCaracterActual = 0;   //Almacena el cáracter que el analizador esta leyendo actualmente   
     }
 
@@ -57,16 +57,22 @@ public class Lexer {
 
         //Itera sobre cada línea del archivo con el código fuente en Python
         //for (String lineaDeCodigoActual : programaEnPythonOriginal) {
-        for (lineaActual = 0; lineaActual < programaEnPythonOriginal.size(); lineaActual++) {
+        for (int lineaActual = 1; lineaActual < programaEnPythonOriginal.size(); lineaActual++) {
             String contenidoDeLaLineaActual = programaEnPythonOriginal.get(lineaActual).trim();
+
+            System.out.println("63 La linea que estamos leyendo: " + lineaActual + " " + contenidoDeLaLineaActual);
             //Verifica si la linea esta en blanco
             if (contenidoDeLaLineaActual.isBlank() || contenidoDeLaLineaActual.isEmpty()) {
+                //Agrega la linea que actualmente se analiza al archivo de salida 
+                registrarLineaAnalizadaEnProgramaEnPythonRevisado(contenidoDeLaLineaActual, numeroLineaActual);
                 numeroLineaActual++;
                 continue;
             }
 
             //Verifica si la linea es un comentario o si hay comentarios al final de una linea de código
             if (existeComentario(contenidoDeLaLineaActual)) {
+                //Agrega la linea que actualmente se analiza al archivo de salida 
+                registrarLineaAnalizadaEnProgramaEnPythonRevisado(contenidoDeLaLineaActual, numeroLineaActual);
                 cantidadComentarios++;
                 contenidoDeLaLineaActual = contenidoDeLaLineaActual.split("#")[0].trim(); // Elimina la parte del comentario en la línea
             }
@@ -171,76 +177,78 @@ public class Lexer {
 
                     //Identifica los operadores de string 
                     case '"':
-                        
+
                         System.out.println("\n\n<<< 175 Lexico> ENCONTRAMOS COMILLAS>>> " + String.valueOf(caracterActual));
                         agregarNuevoToken(null, TipoDeToken.COMILLAS, String.valueOf(caracterActual), numeroLineaActual);
 
                         //Recolentamos el texto entre comillas
                         String textoDelString = new String();
                         textoDelString = leyendoUnString(contenidoDeLaLineaActual.substring(indiceCaracterActual + 1)); //Evitamos las comillas
-                        if(textoDelString.length() !=0){
-                              agregarNuevoToken(null, TipoDeToken.TEXTO_ENTRE_COMILLAS, textoDelString, numeroLineaActual);
+                        if (textoDelString.length() != 0) {
+                            agregarNuevoToken(null, TipoDeToken.TEXTO_ENTRE_COMILLAS, textoDelString, numeroLineaActual);
                         }
-                      
 
+                        break;
 
+                    //Idenficador que comienza con guión bajo    
+                    case '_':
+                        //String str = "_";
+                        StringBuffer str = new StringBuffer();
+                        str.append('_');
+                        while (indiceCaracterActual < contenidoDeLaLineaActual.length() && caracterActual != ' ') {
+                            str.append(contenidoDeLaLineaActual.charAt(indiceCaracterActual));
+                            indiceCaracterActual++;
+                        }
+                        if (!str.isEmpty()) {
+                            if (verificarPrimerCaracterDeUnIdentificador(str.toString(), numeroLineaActual)
+                                    && verificarSecuenciaDeCaracteresDeUnIdentificador(str.toString(), numeroLineaActual)) {
+                                System.out.println(" 203 Este es el TOKEN  BORRAR:   " + str.toString() + " en linea " + numeroLineaActual
+                                        + "  valor de i " + indiceCaracterActual + "\n");
+                                agregarNuevoToken(string, TipoDeToken.IDENTIFICADOR, str.toString(), this.numeroLineaActual);
+
+                            } else {
+                                agregarNuevoToken(string, TipoDeToken.DESCONOCIDO, str.toString(), this.numeroLineaActual);
+                            }
+                        }
+                        str = null;
                         break;
 
                     // Identifica números enteros, decimales, identificadores y palabras reservadas    
                     default: {
 
+                        StringBuffer str1 = new StringBuffer();
+                      
+                        while (indiceCaracterActual < contenidoDeLaLineaActual.length() && caracterActual != ' ') {
+                            str1.append(contenidoDeLaLineaActual.charAt(indiceCaracterActual));
+                            indiceCaracterActual++;
+                        }
+                        
                         PalabraReservada palabraReservada = new PalabraReservada();
 
-                       
-                        char[] caracteres = {' ', '=', '(', ')', '[', ']', '+', '-', '*', '/', '%', '<', '>'};
-
-                        string = string + caracterActual;
-
-                        if (i < arregloCaracteres.length - 1) {
-                            caracterSiguiente = arregloCaracteres[i + 1];
-
-                            while ((i < arregloCaracteres.length - 1)) {
-                                boolean encontrado = false;
-                                for (char ch : caracteres) {
-                                    if (caracterSiguiente == ch) {
-                                        encontrado = true;
-                                        break;
-                                    }
-                                }
-
-                                if (encontrado) {
-                                    break;
-                                } else {
-                                    ++i;
-                                    caracterActual = arregloCaracteres[i];
-                                    string = string + caracterActual;
-                                    if (i < (arregloCaracteres.length - 1)) {
-                                        caracterSiguiente = arregloCaracteres[i + 1];
-                                    } // fin if
-                                }
-
-                            } // fin while
-                        } // fin if
-
-                         
                         
-                        /*
-                        if (esCaracterAlfabetico(caracterActual)) {
+                        //Identifica un posible identificador o palabra reservada
+                        
+                        
+                        if (esCaracterAlfabetico(caracterActual) || caracterActual == '_') {
                             String identifier = leyendoCadenaDeCaracteres(arregloCaracteres);
+                            System.out.println(" 194 Este es el TOKEN  BORRAR:   " + identifier.trim() + " en linea " + numeroLineaActual
+                                    + "  valor de i " + indiceCaracterActual + "\n");
+
                             if (palabraReservada.esPalabraReservada(identifier)) {
                                 agregarNuevoToken(string, TipoDeToken.PALABRA_RESERVADA, identifier.trim(), this.numeroLineaActual);
-                            } else {
+                            } else if (verificarPrimerCaracterDeUnIdentificador(identifier.trim(), numeroLineaActual)
+                                    && verificarSecuenciaDeCaracteresDeUnIdentificador(identifier.trim(), numeroLineaActual)) {
+                                System.out.println(" 194 Este es el TOKEN  BORRAR:   " + identifier.trim() + " en linea " + numeroLineaActual
+                                        + "  valor de i " + indiceCaracterActual + "\n");
                                 agregarNuevoToken(string, TipoDeToken.IDENTIFICADOR, identifier.trim(), this.numeroLineaActual);
+
+                            } else {
+                                agregarNuevoToken(string, TipoDeToken.DESCONOCIDO, identifier.trim(), this.numeroLineaActual);
                             }
-                        } else if (caracterActual == '"') {
-                            //agregarNuevoToken(string, TipoDeToken.TEXTO_ENTRE_COMILLAS, leyendoUnString(arregloCaracteres), this.numeroLineaActual);
-                        } else {
-                            // Manejar otros caracteres
                         }
 
-                        */
-                        System.out.println(" 273 Este es el TOKEN  BORRAR:   " + string.trim() + " en linea " + numeroLineaActual
-                                + "  valor de i " + indiceCaracterActual + "\n");
+                    
+
 
                         /*
                         if (esNumeroEntero(string.trim())) {
@@ -266,13 +274,13 @@ public class Lexer {
             numeroLineaActual++; //Aumenta con cada linea que es analizada
         }
 
-        System.out.println("\n\n<<< 124 Lexico> CANTIDAD DE TOKENS EN EL LEXICO>>> " + listaDeTokens.size());
+        System.out.println("\n\n<<< 235 Lexico> CANTIDAD DE TOKENS EN EL LEXICO>>> " + listaDeTokens.size());
         System.out.println("\n\n<<<CANTIDAD DE TOKENS>>> " + listaDeTokens.size());
         listaDeTokens.forEach((item) -> {
             System.out.println(item.getLexema() + " " + item.getTipoDeToken() + " " + item.getLiteral() + " " + item.getNumeroLinea());
         });
 
-        System.out.println("\n\n<<< 124 Lexico> LISTA DE TOKENS REVISADO>>> " + programaEnPythonRevisado.size());
+        System.out.println("\n\n<<< 241 Lexico> PROGRAMA REVISADO>>> " + programaEnPythonRevisado.size());
         programaEnPythonRevisado.forEach((item) -> {
             System.out.println(item);
         });
@@ -338,9 +346,10 @@ public class Lexer {
         }
 
         if (string.matches("^[a-zA-Z_].*")) {
+            System.out.println("315 verificarPrimeraCaracter Borrar " + "inicia con letra o _");
             return true;
         } else {
-            System.out.println("191 Borrar " + Error.obtenerDescripcionDeError(200));
+            System.out.println("318 verificarPrimeraCaracter Borrar " + Error.obtenerDescripcionDeError(200));
             registrarMensajeDeErrorEnProgramaEnPythonRevisado(200, numero);
             return false;
         }
@@ -352,13 +361,16 @@ public class Lexer {
     public boolean verificarSecuenciaDeCaracteresDeUnIdentificador(String string, int numero) {
         // Verificar los caracteres restantes
         if (string == null || string.isEmpty()) {
+            System.out.println("315 verificarPrimeraCaracter Borrar " + "inicia con letra o _");
             return false;
         }
 
         if (string.matches("[a-zA-Z0-9_]*$")) {
+            System.out.println("335 verificarSecuenciaDeCaracteres Borrar " + "cadena de caracteres alfanumericos  " + string);
+
             return true;
         } else {
-            System.out.println("201 Borrar " + Error.obtenerDescripcionDeError(201));
+            System.out.println("338 metodo verificarSecuenciaDeCaracter Borrar " + Error.obtenerDescripcionDeError(201));
             registrarMensajeDeErrorEnProgramaEnPythonRevisado(201, numero);
             return false;
         }
@@ -394,39 +406,60 @@ public class Lexer {
     }
 
     private boolean verificarCaracterSiguiente(char caracterSiguiente) {
-        if (indiceCaracterActual >= programaEnPythonOriginal.get(numeroLineaActual).length()
-                || programaEnPythonOriginal.get(numeroLineaActual).charAt(indiceCaracterActual) != caracterSiguiente) {
-            return false; // El caracter siguiente no es el esperado
+        if (indiceCaracterActual < programaEnPythonOriginal.get(numeroLineaActual).length()) {
+            if (programaEnPythonOriginal.get(numeroLineaActual).charAt(indiceCaracterActual) != caracterSiguiente) {
+                return false; // El caracter siguiente no es el esperado    
+            }
         }
         indiceCaracterActual++;
         return true;
     }
 
     private String leyendoCadenaDeCaracteres(char[] cadena) {
+        System.out.print("401 Entramos a metodo leyendoCadenaDeCaracteres: ");
+        System.out.println(cadena);
+
         int inicioCadena = indiceCaracterActual;
 
-        while (indiceCaracterActual < cadena.length && esCaracterAlfaNumerico(cadena[indiceCaracterActual])) {
+        char[] caracteres = {' ', '=', '(', ')', '[', ']', '+', '-', '*', '/', '%', '<', '>'};
+
+        boolean encontrado = false;
+        while (indiceCaracterActual < cadena.length && cadena[indiceCaracterActual] != ' ' && !encontrado) {
+            for (char ch : caracteres) {
+                if (cadena[indiceCaracterActual] == ch) {
+                    encontrado = true;
+                    break;
+                }
+            }
+            if (encontrado) {
+                break;
+            }
+            System.out.println("420 En el while el indice de caracter actual es: " + indiceCaracterActual + " " + cadena[indiceCaracterActual]);
             indiceCaracterActual++;
         }
 
         String string = new String(cadena, inicioCadena, indiceCaracterActual - inicioCadena);
         indiceCaracterActual--;
+
+        System.out.print("427 Salimos de metodo leyendoCadenaDeCaracteres:  ");
+        System.out.println(string);
+
         return string;
     }
 
     private String leyendoUnString(String string) {
         System.out.println("Entramos a metodo leyendoUnString");
         System.out.println(string);
-        int inicioString = 0; 
+        int inicioString = 0;
         System.out.println(inicioString);
-        while (inicioString < string.length() && string.charAt(inicioString) != '"' && string.charAt(inicioString) != ')' ) {
-            System.out.println("En el while el indice de caracter actual es: " + inicioString +  " "+ string.charAt(inicioString));
+        while (inicioString < string.length() && string.charAt(inicioString) != '"' && string.charAt(inicioString) != ')') {
+            System.out.println("439 En el while el indice de caracter actual es: " + inicioString + " " + string.charAt(inicioString));
             inicioString++;
         }
-        System.out.println("El indice de caracter actual es: " + indiceCaracterActual);
+        System.out.println("442 El indice de caracter actual es: " + indiceCaracterActual);
         String str = string.substring(0, inicioString); // Saltar la comilla final
         indiceCaracterActual = indiceCaracterActual + str.length();
-        System.out.print("Salimos de metodo leyendoUnString:  ");
+        System.out.print(" 445 Salimos de metodo leyendoUnString:  ");
         System.out.println(str);
         return str;
     }
